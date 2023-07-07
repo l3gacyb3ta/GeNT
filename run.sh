@@ -11,12 +11,6 @@ cp -v limine.cfg limine/limine-bios.sys \
       limine/limine-bios-cd.bin limine/limine-uefi-cd.bin iso_root/
 mkdir -p iso_root/EFI/BOOT
 cp -v limine/BOOT*.EFI iso_root/EFI/BOOT/
-xorriso -as mkisofs -b limine-bios-cd.bin \
-        -no-emul-boot -boot-load-size 4 -boot-info-table \
-        --efi-boot limine-uefi-cd.bin \
-        -efi-boot-part --efi-boot-image --protective-msdos-label \
-        iso_root -o GeNT.iso
-./limine/limine bios-install GeNT.iso
 
 qemu-system-riscv64 \
     -machine virt \
@@ -24,7 +18,8 @@ qemu-system-riscv64 \
     -smp 1 \
     -m 512M \
     -drive if=pflash,format=raw,unit=1,file=EDK2.fd \
+    -device nvme,serial=deadbeff,drive=disk1 \
+    -drive id=disk1,format=raw,if=none,file=fat:rw:./iso_root\
     -global virtio-mmio.force-legacy=false \
     -device ramfb \
-    -cdrom GeNT.iso \
     -serial mon:stdio
