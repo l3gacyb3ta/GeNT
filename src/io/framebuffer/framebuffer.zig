@@ -1,7 +1,7 @@
 // © 2023 Lilly & GeNT Developers archaic.archea@gmail.com
 // License: [CNPL](https://git.pixie.town/thufie/npl-builder/raw/branch/main/cnpl.md)
 
-const limine = @import("libs/limine.zig");
+const limine = @import("../../libs/limine.zig");
 const font = @import("font.zig");
 
 pub const FrameBuffer = struct {

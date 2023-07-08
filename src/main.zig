@@ -3,8 +3,8 @@
 
 const std = @import("std");
 const limine = @import("libs/limine.zig");
-const fb_lib = @import("framebuffer.zig");
-const pmm = @import("pmm.zig");
+const fb_lib = @import("io/framebuffer/framebuffer.zig");
+const pmm = @import("mem/pmm.zig");
 
 export var memory_map = limine.MemoryMapRequest{};
 export var fb = limine.FramebufferRequest{};
