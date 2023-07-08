@@ -30,6 +30,7 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
     exe.pie = false;
+    exe.setLinkerScriptPath(.{ .path = "config/linker.lds" });
 
     b.installArtifact(exe);
 }
