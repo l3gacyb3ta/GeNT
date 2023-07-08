@@ -1,5 +1,7 @@
 rm -rf ./.root
 
+zig build
+
 if ! test -f "EDK2.fd"; then
     curl https://retrage.github.io/edk2-nightly/bin/RELEASERISCV64_VIRT.fd -o EDK2.fd
 fi
@@ -21,7 +23,7 @@ qemu-system-riscv64 \
     -m 512M \
     -drive if=pflash,format=raw,unit=1,file=EDK2.fd \
     -device nvme,serial=deadbeff,drive=disk1 \
-    -drive id=disk1,format=raw,if=none,file=fat:rw:./.root\
+    -drive id=disk1,format=raw,if=none,file=fat:rw:./.root \
     -global virtio-mmio.force-legacy=false \
     -device ramfb \
     -serial mon:stdio

@@ -29,8 +29,9 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    exe.pie = false;
+    exe.addAssemblyFileSource(.{ .path = "src/init.S" });
     exe.setLinkerScriptPath(.{ .path = "config/linker.lds" });
+    exe.code_model = .small;
 
     b.installArtifact(exe);
 }
