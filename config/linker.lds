@@ -27,25 +27,25 @@ SECTIONS
 
     PROVIDE(__executable_start = .);
         PROVIDE(__nonpageable_start = .);
-            .rodata                 : ALIGN(4096) { *(.rodata .rodata.*) }
-            .text                   : ALIGN(4096) { *(.text .text.*) }
+            .rodata                 : ALIGN(4096) { *(.rodata .rodata.*) } :rodata
+            .text                   : ALIGN(4096) { *(.text .text.*) } :text
             PROVIDE(_global_pointer = .);
-            .data                   : ALIGN(4096) { *(.data .data.*) *(.sdata .sdata.*) }
-            .bss                    : ALIGN(4096) { *(.sbss .sbss.*) *(.dynbss) *(.bss .bss.*) }
+            .data                   : ALIGN(4096) { *(.data .data.*) *(.sdata .sdata.*) } :data
+            .bss                    : ALIGN(4096) { *(.sbss .sbss.*) *(.dynbss) *(.bss .bss.*) } :data
         PROVIDE(__nonpageable_end = .);
 
         PROVIDE(__pageable_start = .);
-            .pdata                  : ALIGN(4096) { *(.pdata .pdata.*) }
+            .pdata                  : ALIGN(4096) { *(.pdata .pdata.*) } :pdata
         PROVIDE(__pageable_end = .);
 
         /*
             Init stuff will ALWAYS be dropped as soon as initialization is exited
         */
         PROVIDE(__init_start = .);
-            .initext                : ALIGN(4096) { *(.initext .initext.*) }
+            .initext                : ALIGN(4096) { *(.initext .initext.*) } :initext
             PROVIDE(__tdata_start = .);
-                .tdata              : ALIGN(4096) { *(.tdata .tdata.*) }
-                .tbss               : ALIGN(4096) { *(.tbss .tbss.*) }
+                .tdata              : ALIGN(4096) { *(.tdata .tdata.*) } :tdata
+                .tbss               : ALIGN(4096) { *(.tbss .tbss.*) } :tdata
             PROVIDE(__tdata_end = .);
         PROVIDE(__init_end = .);
     PROVIDE(__executable_end = .);

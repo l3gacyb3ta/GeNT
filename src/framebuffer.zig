@@ -31,14 +31,16 @@ pub const FrameBuffer = struct {
     }
 
     pub fn write_char(self: *const FrameBuffer, character: u8) void {
-        const index: usize = @intCast(character);
+        const index = @intCast(usize, character);
         const char_bitmap = font.BASIC[index];
 
-        for (0..8) |byte_index| {
+        var byte_index: usize = 0;
+        while (byte_index < 8) {
             const byte = char_bitmap[byte_index];
 
-            for (0..8) |bit_index| {
-                const bit = (byte >> @intCast(bit_index)) & 0b1;
+            var bit_index: usize = 0;
+            while (bit_index < 8) {
+                const bit = (byte >> @intCast(u3, bit_index)) & 0b1;
                 const byte_offset = self.coord_to_byteoffset(self.cur_x + bit_index, self.cur_y + byte_index);
                 var val: u8 = 0;
 
@@ -50,7 +52,11 @@ pub const FrameBuffer = struct {
                 self.bytes[byte_offset + 1] = val;
                 self.bytes[byte_offset + 2] = val;
                 self.bytes[byte_offset + 3] = val;
+
+                bit_index += 1;
             }
+
+            byte_index += 1;
         }
     }
 
@@ -63,6 +69,28 @@ pub const FrameBuffer = struct {
                 self.cur_y = 0;
             }
         }
+    }
+
+    pub fn inc_char(self: *FrameBuffer) void {
+        self.cur_x += 8;
+        if (self.cur_x >= self.width) {
+            self.cur_x = 0;
+            self.cur_y += 8;
+            if (self.cur_y >= self.height) {
+                self.cur_y = 0;
+            }
+        }
+    }
+
+    pub fn inc_char_line(self: *FrameBuffer) void {
+        self.cur_y += 8;
+        if (self.cur_y >= self.width) {
+            self.cur_y = 0;
+        }
+    }
+
+    pub fn ret(self: *FrameBuffer) void {
+        self.cur_x = 0;
     }
 
     pub fn pixels(self: *const FrameBuffer) usize {

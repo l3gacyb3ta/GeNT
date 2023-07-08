@@ -175,69 +175,6 @@ pub const OobOutputFlags = enum(u64) {
     opost = 1 << 7,
 };
 
-pub const TerminalResponse = extern struct {
-    revision: u64,
-    terminal_count: u64,
-    terminals_ptr: [*]*Terminal,
-    write_fn: *const fn (*Terminal, [*]const u8, u64) callconv(.C) void,
-
-    pub inline fn terminals(self: *@This()) []*Terminal {
-        return self.terminals_ptr[0..self.terminal_count];
-    }
-
-    pub inline fn write(self: *@This(), terminal: ?*Terminal, string: []const u8) void {
-        self.write_fn(terminal orelse self.terminals_ptr[0], string.ptr, string.len);
-    }
-
-    pub inline fn ctxSize(self: *@This(), terminal: ?*Terminal) u64 {
-        var result: u64 = undefined;
-        self.write_fn(terminal orelse self.terminals_ptr[0], @as([*]const u8, @ptrCast(&result)), @as(u64, @bitCast(@as(i64, -1))));
-        return result;
-    }
-
-    pub inline fn ctxSave(self: *@This(), terminal: ?*Terminal, ctx: [*]u8) void {
-        self.write_fn(terminal orelse self.terminals_ptr[0], @as([*]const u8, @ptrCast(ctx)), @as(u64, @bitCast(@as(i64, -2))));
-    }
-
-    pub inline fn ctxRestore(self: *@This(), terminal: ?*Terminal, ctx: [*]const u8) void {
-        self.write_fn(terminal orelse self.terminals_ptr[0], @as([*]const u8, @ptrCast(ctx)), @as(u64, @bitCast(@as(i64, -3))));
-    }
-
-    pub inline fn fullRefresh(self: *@This(), terminal: ?*Terminal) void {
-        self.write_fn(terminal orelse self.terminals_ptr[0], "", @as(u64, @bitCast(@as(i64, -4))));
-    }
-
-    // Response revision 1
-    pub inline fn oobOutputGet(self: *@This(), terminal: ?*Terminal) u64 {
-        var result: u64 = undefined;
-        self.write_fn(terminal orelse self.terminals_ptr[0], @as([*]const u8, @ptrCast(&result)), @as(u64, @bitCast(@as(i64, -10))));
-        return result;
-    }
-
-    pub inline fn oobOutputSet(self: *@This(), terminal: ?*Terminal, value: u64) void {
-        self.write_fn(terminal orelse self.terminals_ptr[0], @as([*]const u8, @ptrCast(&value)), @as(u64, @bitCast(@as(i64, -11))));
-    }
-};
-
-pub const CallbackType = enum(u64) {
-    dec = 10,
-    bell = 20,
-    private_id = 30,
-    status_report = 40,
-    pos_report = 50,
-    kbd_leds = 60,
-    mode = 70,
-    linux = 80,
-    _,
-};
-
-pub const TerminalRequest = extern struct {
-    id: [4]u64 = magic(0xc8ac59310c2b0844, 0xa68d0c7265d38878),
-    revision: u64 = 0,
-    response: ?*TerminalResponse = null,
-    callback: ?*const fn (*Terminal, CallbackType, u64, u64, u64) callconv(.C) void = null,
-};
-
 // Paging mode
 
 const X86PagingMode = enum(u64) {

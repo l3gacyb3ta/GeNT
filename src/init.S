@@ -13,8 +13,10 @@ _asm_init:
     .option norelax
     lla gp, _global_pointer
     .option pop
+
+	lla t0, trap
+	csrw stvec, t0
  
-	/* Jump to initialization! */
 	tail _init
 
 	j hlt_loop
@@ -24,3 +26,7 @@ _asm_init:
 hlt_loop:
 	wfi
 	j hlt_loop
+
+trap:
+	wfi
+	j trap

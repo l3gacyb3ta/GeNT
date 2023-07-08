@@ -6,13 +6,13 @@ const Target = @import("std").Target;
 const CrossTarget = @import("std").zig.CrossTarget;
 const Feature = @import("std").Target.Cpu.Feature;
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.build.Builder) void {
     const features = Target.riscv.Feature;
 
     var enabled_features = Feature.Set.empty;
-    enabled_features.addFeature(@intFromEnum(features.m));
-    enabled_features.addFeature(@intFromEnum(features.a));
-    enabled_features.addFeature(@intFromEnum(features.c));
+    enabled_features.addFeature(@enumToInt(features.m));
+    enabled_features.addFeature(@enumToInt(features.a));
+    enabled_features.addFeature(@enumToInt(features.c));
 
     const target = CrossTarget{
         .cpu_arch = Target.Cpu.Arch.riscv64,
@@ -21,17 +21,11 @@ pub fn build(b: *std.Build) void {
         .cpu_features_add = enabled_features,
     };
 
-    const optimize = b.standardOptimizeOption(.{});
+    const kern = b.addExecutable("GeNT-kern", "src/main.zig");
+    kern.addAssemblyFileSource(.{ .path = "src/init.S" });
+    kern.setLinkerScriptPath(.{ .path = "config/linker.lds" });
+    kern.code_model = .small;
+    kern.target = target;
 
-    const exe = b.addExecutable(.{
-        .name = "GeNT-kern",
-        .root_source_file = .{ .path = "src/main.zig" },
-        .target = target,
-        .optimize = optimize,
-    });
-    exe.addAssemblyFileSource(.{ .path = "src/init.S" });
-    exe.setLinkerScriptPath(.{ .path = "config/linker.lds" });
-    exe.code_model = .small;
-
-    b.installArtifact(exe);
+    b.installArtifact(kern);
 }
