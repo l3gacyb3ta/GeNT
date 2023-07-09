@@ -2,6 +2,13 @@ rm -rf ./.root
 
 zig build
 
+if [ $? -eq 0 ]; then
+    echo Build success
+else
+    echo Build failure
+    exit
+fi
+
 if ! test -f "EDK2.fd"; then
     curl https://retrage.github.io/edk2-nightly/bin/RELEASERISCV64_VIRT.fd -o EDK2.fd
 fi
