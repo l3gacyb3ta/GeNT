@@ -16,6 +16,7 @@ The three sections are labeled the following
 GeNT is split up into several Core Modules, each of these serves a purpose in the OS.
 * Init          - The Init core module is the same as the section specified in Sections, this is only used at the beginning, and is used for initialization. See the Init section of this document for more information
 * Exit-Init     - Remove the Init components from memory
+* Swapping      - A module dedicated to managing loading things into and out of RAM as needed to maintain free space
 
 ## Init
 The initialization process consists of starting up every Core on the system, setting up storage drivers, interrupt set up, among other system specific initialization processes.

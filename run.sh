@@ -21,7 +21,6 @@ qemu-system-riscv64 \
     -cpu rv64,svpbmt=on \
     -smp 1 \
     -m 512M \
-    -d int \
     -drive if=pflash,format=raw,unit=1,file=EDK2.fd \
     -device nvme,serial=deadbeff,drive=disk1 \
     -drive id=disk1,format=raw,if=none,file=fat:rw:./.root \
