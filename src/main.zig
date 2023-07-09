@@ -20,8 +20,6 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
 
     stdout.print("Booting on {s} v{s}\n\r", .{ bootinfo.response.?.name, bootinfo.response.?.version }) catch {};
 
-    @breakpoint();
-
     const memory_map_resp = memory_map.response.?.entries();
     var isinit = false;
 
