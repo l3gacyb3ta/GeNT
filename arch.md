@@ -17,9 +17,13 @@ GeNT is split up into several Core Modules, each of these serves a purpose in th
 * Init          - The Init core module is the same as the section specified in Sections, this is only used at the beginning, and is used for initialization. See the Init section of this document for more information
 * Exit-Init     - Remove the Init components from memory
 * Swapping      - A module dedicated to managing loading things into and out of RAM as needed to maintain free space, more information can be found in the Swap section.
+* Hardware Abstraction Layer - The module responsible for providing an architecture-independent abstraction for different concepts more info in the section HAL
 
 ## Init
 The initialization process consists of starting up every Core on the system, setting up storage drivers, interrupt set up, among other system specific initialization processes.
 
 ## Swap
 In some systems memory may not be very available, so we can use swapping to free up space in RAM, this can be applied on some parts of the kernel, as well as the majority of tasks. First when swapping out a page, we look for an available spot in swap storage, and once we find a valid block, we copy the page of RAM into it, and the in the PTE associated with the page, we store the ID of the spot in swap.
+
+## HAL
+The hardware abstraction layer is made up of a few key points. First theres the paging abstraction, this prevents each and every coder from having to interact with the AS(Architecture specific) features about paging, such as page size, page entries, etc. Next is the interrupt abstraction, this covers up the AS interrupt systems, such as interrupt priority, whether or not MSIs are enabled, and actual transport methods on IO devices. Finally, the last abstraction point is the disk abstraction layer, this prevents coders from having to interact with the drivers for disks directly, as disk drivers are built into the kernel due to their importance in kernel operation.
