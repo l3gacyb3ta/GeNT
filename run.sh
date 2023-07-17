@@ -33,4 +33,6 @@ qemu-system-riscv64 \
     -drive id=disk1,format=raw,if=none,file=fat:rw:./.root \
     -global virtio-mmio.force-legacy=false \
     -device ramfb \
-    -serial mon:stdio
+    -serial mon:stdio \
+    -d int \
+    -D debug.log
