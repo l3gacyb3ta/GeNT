@@ -22,4 +22,4 @@ GeNT is split up into several Core Modules, each of these serves a purpose in th
 The initialization process consists of starting up every Core on the system, setting up storage drivers, interrupt set up, among other system specific initialization processes.
 
 ## Swap
-In some systems memory may not be very available, so we can use swapping to free up space in RAM, this can be applied on some parts of the kernel, as well as the majority of tasks. First
+In some systems memory may not be very available, so we can use swapping to free up space in RAM, this can be applied on some parts of the kernel, as well as the majority of tasks. First when swapping out a page, we look for an available spot in swap storage, and once we find a valid block, we copy the page of RAM into it, and the in the PTE associated with the page, we store the ID of the spot in swap.
