@@ -18,15 +18,15 @@ pub const Rsdp = extern struct {
 
 pub const Xsdt = extern struct {
     header: SDTHeader,
-    sdt_ptr: u64,
+    sdt_ptr: u64 align(4),
 
     pub fn entry_count(self: *const Xsdt) usize {
         return (self.header.len - @sizeOf(SDTHeader)) / 8;
     }
 
-    pub fn sdts(self: *const Xsdt) [*]const *const SDTHeader {
+    pub fn sdts(self: *const Xsdt) [*]align(4) const *const SDTHeader {
         var ptr_base = @ptrToInt(&self.sdt_ptr);
-        var ptr = @intToPtr([*]const *const SDTHeader, ptr_base);
+        var ptr = @intToPtr([*]align(4) const *const SDTHeader, ptr_base);
 
         return ptr;
     }
@@ -69,20 +69,5 @@ pub const SDTHeader = extern struct {
         try stdout.print("oemrev: {}\n\r", .{self.oemrev});
         try stdout.print("creator id: {}\n\r", .{self.creator_id});
         try stdout.print("creator rev: {}\n\r", .{self.creator_rev});
-    }
-
-    pub fn is_valid(self: *const SDTHeader) bool {
-        const size: usize = @sizeOf(SDTHeader);
-        const arr = @bitCast([size]u8, self.*);
-
-        var total: usize = 0;
-
-        var idx: usize = 0;
-        while (idx < size) {
-            total += arr[idx];
-            idx += 1;
-        }
-
-        return total == 0;
     }
 };

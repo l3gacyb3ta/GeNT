@@ -24,13 +24,13 @@ pub const Kstdout = struct {
 
         for (string) |char| {
             if (char == '\n') {
-                stderr.print("Writing '\\n' to framebuffer\n", .{}) catch {};
+                stderr.print("\n", .{}) catch {};
                 self.framebufferwriter.inc_char_line();
             } else if (char == '\r') {
-                stderr.print("Writing '\\r' to framebuffer\n", .{}) catch {};
+                stderr.print("\r", .{}) catch {};
                 self.framebufferwriter.ret();
             } else {
-                stderr.print("Writing '{c}'(0x{x}) to framebuffer\n", .{ char, char }) catch {};
+                stderr.print("{c}", .{char}) catch {};
                 self.framebufferwriter.write_char(char);
                 self.framebufferwriter.inc_char();
             }

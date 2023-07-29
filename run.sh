@@ -24,7 +24,7 @@ mkdir -p .root/EFI/BOOT
 cp -v limine/BOOTRISCV64.EFI .root/EFI/BOOT/
 
 qemu-system-riscv64 \
-    -machine virt \
+    -machine virt,aclint=on,aia=aplic \
     -cpu rv64,svpbmt=on \
     -smp 1 \
     -m 512M \

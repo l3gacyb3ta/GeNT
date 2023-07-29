@@ -64,7 +64,8 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
 
     const xsdt = rsdp.xsdt_addr;
     if (xsdt.is_valid()) {
-        stdout.print("XSDT valid\n\r", .{}) catch {};
+        stdout.print("XSDT:\n\r", .{}) catch {};
+        xsdt.header.print_header(stdout) catch {};
     } else {
         stdout.print("XSDT sig invalid\n\r", .{}) catch {};
         while (true) {}
@@ -77,7 +78,7 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
     var sdt_idx: usize = 0;
     while (sdt_idx < entries) {
         var sdts = xsdt.sdts();
-        stdout.print("Entry {*}\n\r", .{sdts[sdt_idx]}) catch {};
+        stdout.print("Entry {s}\n\r", .{sdts[sdt_idx].sig}) catch {};
         sdt_idx += 1;
     }
 
