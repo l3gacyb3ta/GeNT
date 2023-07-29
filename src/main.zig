@@ -6,11 +6,13 @@ const limine = @import("libs/limine.zig");
 const fb_lib = @import("io/framebuffer/framebuffer.zig");
 const pmm = @import("mem/pmm.zig");
 const gentlib = @import("lib.zig");
+const acpi = @import("sys/acpi.zig");
 
 export var memory_map = limine.MemoryMapRequest{};
 export var fb = limine.FramebufferRequest{};
 export var hhdm_req = limine.HhdmRequest{};
 export var bootinfo = limine.BootloaderInfoRequest{};
+export var rsdp_req = limine.RsdpRequest{};
 
 export fn _init() linksection(".init.initext") callconv(.C) void {
     const hhdm_offset = hhdm_req.response.?.offset;
@@ -24,8 +26,6 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
     var isinit = false;
 
     for (memory_map_resp) |entry| {
-        stdout.print("Adding entry...\n\r", .{}) catch {};
-
         var lock = pmm.FREE_MEM.lockOrPanic();
         defer lock.unlock();
 
@@ -48,12 +48,38 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
         }
     }
 
-    for ("Set up memory map") |character| {
-        framebuffer.write_char(character);
-        framebuffer.inc_char();
+    stdout.print("Set up memory map\n\r", .{}) catch {};
+
+    // Test ACPI stuff
+    const rsdp: *const acpi.Rsdp = @ptrCast(*const acpi.Rsdp, rsdp_req.response.?.address);
+
+    if (rsdp.is_valid()) {
+        stdout.print("RSDP valid\n\r", .{}) catch {};
+    } else {
+        stdout.print("RSDP is not 64 bits, aborting\n\r", .{}) catch {};
+        while (true) {}
     }
-    framebuffer.inc_char_line();
-    framebuffer.ret();
+
+    stdout.print("OEMID: {s}\n\r", .{rsdp.oemid}) catch {};
+
+    const xsdt = rsdp.xsdt_addr;
+    if (xsdt.is_valid()) {
+        stdout.print("XSDT valid\n\r", .{}) catch {};
+    } else {
+        stdout.print("XSDT sig invalid\n\r", .{}) catch {};
+        while (true) {}
+    }
+
+    const entries = xsdt.entry_count();
+
+    stdout.print("Found {} SDT entries\n\r", .{entries}) catch {};
+
+    var sdt_idx: usize = 0;
+    while (sdt_idx < entries) {
+        var sdts = xsdt.sdts();
+        stdout.print("Entry {*}\n\r", .{sdts[sdt_idx]}) catch {};
+        sdt_idx += 1;
+    }
 
     //TODO: Set up VMM
 
