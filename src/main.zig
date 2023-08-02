@@ -82,6 +82,12 @@ export fn _init() linksection(".init.initext") callconv(.C) void {
         sdt_idx += 1;
     }
 
+    var rhct = @ptrCast(?*align(4) const acpi.rhct.Rhct, xsdt.find_entry("RHCT")).?;
+    stdout.print("RHCT nodes: {}\n\r", .{rhct.node_count}) catch {};
+
+    var mmu = @ptrCast(*const acpi.rhct.MMUNode, rhct.find_node(acpi.rhct.NodeType.MMU).?);
+    stdout.print("MMU: {}\n\r", .{mmu.mmu_type}) catch {};
+
     //TODO: Set up VMM
 
     main();

@@ -15,3 +15,16 @@ pub fn getStdWriter(framebuffer: fb.FrameBuffer) stdio.Kstdout {
 pub fn getStdErr() stderr.Kstderr {
     return .{};
 }
+
+pub fn memcmp(mem1: []const u8, mem2: []const u8) bool {
+    var idx: usize = 0;
+
+    while (idx < mem1.len) {
+        if (mem1[idx] != mem2[idx]) {
+            return false;
+        }
+        idx += 1;
+    }
+
+    return true;
+}

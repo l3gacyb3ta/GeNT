@@ -1,4 +1,5 @@
 const std = @import("std");
+pub const rhct = @import("rhct.zig");
 
 pub const Rsdp = extern struct {
     sig: [8]u8 align(1),
@@ -24,11 +25,11 @@ pub const Xsdt = extern struct {
         return (self.header.len - @sizeOf(SDTHeader)) / 8;
     }
 
-    pub fn sdts(self: *const Xsdt) [*]align(4) const *const SDTHeader {
+    pub fn sdts(self: *const Xsdt) []align(4) const *const SDTHeader {
         var ptr_base = @ptrToInt(&self.sdt_ptr);
         var ptr = @intToPtr([*]align(4) const *const SDTHeader, ptr_base);
 
-        return ptr;
+        return ptr[0..self.entry_count()];
     }
 
     pub fn is_valid(self: *const Xsdt) bool {
@@ -45,6 +46,37 @@ pub const Xsdt = extern struct {
 
         //return is_same and self.header.is_valid();
         return is_same;
+    }
+
+    /// Finds an entry with the given name
+    /// WARNING: Case sensitive
+    /// Returns null if:
+    ///     * The name is not 4 bytes
+    ///     * An entry is not found with the name
+    pub fn find_entry(self: *const Xsdt, name: []const u8) ?*const SDTHeader {
+        if (name.len != 4) {
+            return null;
+        }
+
+        var sdt_arr = self.sdts();
+
+        for (sdt_arr) |sdt| {
+            var is_same = true;
+            var idx: usize = 0;
+            while (idx < 4) {
+                if (sdt.sig[idx] != name[idx]) {
+                    is_same = false;
+                    break;
+                }
+                idx += 1;
+            }
+
+            if (is_same) {
+                return sdt;
+            }
+        }
+
+        return null;
     }
 };
 
