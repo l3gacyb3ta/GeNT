@@ -183,13 +183,17 @@ impl RootTable {
 
     /// Finds the lowest entry in that virtual address, returns page level, and entry
     pub fn read(&self, vaddr: crate::mem::VirtualAddress) -> (Entry, usize) {
+        // `self.1` contains the paging mode
+        // `self.0` contains a mutable pointer to the page tables, we cast it to constant for safety reasons
         let mut cur_level = self.1.to_level();
         let mut table = self.0.cast_const();
 
         loop {
             unsafe {
+                // We get the current entry by dereferencing the table, and indexing it based on the virtual address' vpn for the current level
                 let entry = (*table)[vaddr.vpn(cur_level) as usize];
                 
+                // `entry.entry()` returns an `entry` type, which is an enum identifying an entry as a table, page, or invalid entry
                 match entry.entry() {
                     Entry::Table(next_table) => {
                         table = next_table;
@@ -199,6 +203,8 @@ impl RootTable {
                     }
                 }
 
+                // If the current level is 0 before we decrement the level again, then we found a table entry way lower than we should have
+                // Will change if I encounter it
                 if cur_level == 0 {
                     panic!("Uhhh :clueless:");
                 }
