@@ -61,51 +61,51 @@ impl aml::Handler for Transit {
         }
     }
 
-    fn read_pci_u32(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16) -> u32 {
+    fn read_pci_u32(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16) -> u32 {
         panic!("PCI not implemented");
     }
 
-    fn read_pci_u16(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16) -> u16 {
+    fn read_pci_u16(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16) -> u16 {
         panic!("PCI not implemented");
     }
 
-    fn read_pci_u8(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16) -> u8 {
+    fn read_pci_u8(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16) -> u8 {
         panic!("PCI not implemented");
     }
 
-    fn write_pci_u32(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16, value: u32) {
+    fn write_pci_u32(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16, _value: u32) {
         panic!("PCI not implemented");
     }
 
-    fn write_pci_u16(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16, value: u16) {
+    fn write_pci_u16(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16, _value: u16) {
         panic!("PCI not implemented");
     }
 
-    fn write_pci_u8(&self, segment: u16, bus: u8, device: u8, function: u8, offset: u16, value: u8) {
+    fn write_pci_u8(&self, _segment: u16, _bus: u8, _device: u8, _function: u8, _offset: u16, _value: u8) {
         panic!("PCI not implemented");
     }
 
-    fn read_io_u32(&self, port: u16) -> u32 {
+    fn read_io_u32(&self, _port: u16) -> u32 {
         panic!("No IO ports");
     }
 
-    fn read_io_u16(&self, port: u16) -> u16 {
+    fn read_io_u16(&self, _port: u16) -> u16 {
         panic!("No IO ports");
     }
 
-    fn read_io_u8(&self, port: u16) -> u8 {
-        panic!("No IO ports");
-    }
-    
-    fn write_io_u32(&self, port: u16, value: u32) {
+    fn read_io_u8(&self, _port: u16) -> u8 {
         panic!("No IO ports");
     }
     
-    fn write_io_u16(&self, port: u16, value: u16) {
+    fn write_io_u32(&self, _port: u16, _value: u32) {
         panic!("No IO ports");
     }
     
-    fn write_io_u8(&self, port: u16, value: u8) {
+    fn write_io_u16(&self, _port: u16, _value: u16) {
+        panic!("No IO ports");
+    }
+    
+    fn write_io_u8(&self, _port: u16, _value: u8) {
         panic!("No IO ports");
     }
 }

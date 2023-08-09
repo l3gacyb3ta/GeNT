@@ -24,7 +24,7 @@ impl VirtualAddress {
             2 => self.vpn2(),
             3 => self.vpn3(),
             4 => self.vpn4(),
-            _ => panic!("Indexed too far")
+            _ => panic!("Indexed too far {}", idx)
         };
 
         vpn as usize

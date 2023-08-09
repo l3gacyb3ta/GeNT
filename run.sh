@@ -11,12 +11,13 @@ else
     exit
 fi
 
-if ! test -f "EDK2.fd"; then
+if test -f "EDK2.fd"; then
     curl https://retrage.github.io/edk2-nightly/bin/RELEASERISCV64_VIRT.fd -o EDK2.fd
 fi
 truncate EDK2.fd --size 33554432
 
-if ! test -f "limine"; then
+if test -f "limine"; then
+    echo Grabbing Limine
     git clone https://github.com/limine-bootloader/limine.git --depth 1 --branch=v5.x-branch-binary 
 fi 
 make -C limine

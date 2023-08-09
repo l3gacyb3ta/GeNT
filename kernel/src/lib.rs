@@ -26,7 +26,7 @@ pub fn find_upperhalf_mem() {
 
     let mut addr = base;
 
-    //while (addr < 0xffffffff80000000) && (addr >= base) {
+    while (addr < 0xffffffff80000000) && (addr >= base) {
         let vaddr = mem::VirtualAddress::new(addr);
 
         let (entry, level) = root.read(vaddr);
@@ -35,7 +35,6 @@ pub fn find_upperhalf_mem() {
 
         match entry {
             arch::paging::Entry::Invalid => {
-                println!("Adding entry at 0x{:x}", vaddr.addr());
                 mem::VIRT.add(addr, size).expect("Failed to add virtual entry");
             },
             arch::paging::Entry::Page(_) => {},
@@ -43,5 +42,5 @@ pub fn find_upperhalf_mem() {
         }
 
         addr += size;
-    //}
+    }
 }

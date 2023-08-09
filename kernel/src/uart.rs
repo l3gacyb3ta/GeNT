@@ -7,8 +7,6 @@ pub struct Uart16550 {
 
 use core::{fmt, sync::atomic::{AtomicPtr, Ordering}};
 
-use spin::Mutex;
-
 impl fmt::Write for Uart16550 {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         for character in s.chars() {

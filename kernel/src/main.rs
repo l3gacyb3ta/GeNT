@@ -26,9 +26,9 @@ extern "C" fn kinit() -> ! {
     }
 
     gent_kern::allocator::init();
-    gent_kern::find_upperhalf_mem();
-    loop {}
     println!("Memory initialized");
+    gent_kern::find_upperhalf_mem();
+    println!("Upperhalf found");
 
     let xsdt = unsafe {
         acpi::AcpiTables::from_rsdp(

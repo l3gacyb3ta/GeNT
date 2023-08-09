@@ -1,5 +1,3 @@
-use crate::println;
-
 pub fn get_root_table() -> RootTable {
     let satp_raw: usize;
     unsafe {
@@ -28,9 +26,9 @@ impl Mode {
 
         match self {
             Bare => 0,
-            Sv39 => 3,
-            Sv48 => 4,
-            Sv57 => 5,
+            Sv39 => 2,
+            Sv48 => 3,
+            Sv57 => 4,
             Sv64 => panic!("Sv64 is not valid")
         }
     }
@@ -194,12 +192,9 @@ impl RootTable {
                 
                 match entry.entry() {
                     Entry::Table(next_table) => {
-                        println!("Found table");
                         table = next_table;
                     },
                     _ => {
-                        println!("Level: {}", cur_level);
-                        println!("found entry: 0x{:x} at index: {}", entry.0, vaddr.vpn(cur_level));
                         return (entry.entry(), cur_level)
                     }
                 }
@@ -214,8 +209,6 @@ impl RootTable {
 
     }
 }
-
-impl RootTable {}
 
 #[repr(transparent)]
 pub struct PageTable([PageTableEntry; 512]);
