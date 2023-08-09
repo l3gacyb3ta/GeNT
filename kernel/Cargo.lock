@@ -98,7 +98,7 @@ dependencies = [
 [[package]]
 name = "limine"
 version = "0.1.0"
-source = "git+https://github.com/bolt-os/limine-rs?rev=658a9d9#658a9d9eb94ad00485e27760f55cbc8355372169"
+source = "git+https://github.com/bolt-os/limine-rs#85f7db3f7835991977efd07913317c0877bb9e1a"
 dependencies = [
  "bitflags 1.3.2",
 ]

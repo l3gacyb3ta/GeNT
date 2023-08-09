@@ -17,4 +17,3 @@ bitflags = "2.2.1"
 
 [dependencies.limine]
 git = "https://github.com/bolt-os/limine-rs"
-rev = "658a9d9"
