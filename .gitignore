@@ -1,5 +1,4 @@
-/zig-cache
-/zig-out
+/kernel/target
 /*.fd
 /limine
 /.root

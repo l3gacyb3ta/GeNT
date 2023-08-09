@@ -1,0 +1,20 @@
+[package]
+name = "gent-kern"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+vmem = { git = "https://github.com/archaic-archea/vmem.git" }
+linked_list_allocator = "0.9.0"
+spin = "0.9"
+acpi = "4.1.1"
+aml = "0.16.4"
+rsdp = "2.0.0"
+bitfield = "0.14.0"
+bitflags = "2.2.1"
+
+[dependencies.limine]
+git = "https://github.com/bolt-os/limine-rs"
+rev = "658a9d9"

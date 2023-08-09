@@ -3,7 +3,7 @@
     // License: [CNPL](https://git.pixie.town/thufie/npl-builder/raw/branch/main/cnpl.md)
 */
 
-ENTRY(_asm_init)
+ENTRY(_boot)
 
 PHDRS
 {
@@ -29,9 +29,15 @@ SECTIONS
         PROVIDE(__nonpageable_start = .);
             .rodata                 : ALIGN(4096) { *(.rodata .rodata.*) } :rodata
             .text                   : ALIGN(4096) { *(.text .text.*) } :text
-            PROVIDE(_global_pointer = .);
+            PROVIDE(__global_pointer = .);
             .data                   : ALIGN(4096) { *(.data .data.*) *(.sdata .sdata.*) } :data
-            .bss                    : ALIGN(4096) { *(.sbss .sbss.*) *(.dynbss) *(.bss .bss.*) } :data
+            .bss                    : ALIGN(4096) { 
+                *(.sbss .sbss.*) 
+                *(.dynbss) 
+                *(.bss .bss.*) 
+                . += 0x4000;
+                PROVIDE(__stack_top = .);
+            } :data
         PROVIDE(__nonpageable_end = .);
 
         PROVIDE(__pageable_start = .);
