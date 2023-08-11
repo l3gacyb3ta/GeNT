@@ -17,6 +17,22 @@ impl fmt::Write for Uart16550 {
     }
 }
 
+pub struct Logger;
+
+impl log::Log for Logger {
+    fn enabled(&self, _metadata: &log::Metadata) -> bool {
+        true
+    }
+
+    fn flush(&self) {
+    }
+
+    fn log(&self, record: &log::Record) {
+        use crate::println;
+        println!("[{}]{}: {}", record.level(), record.target(), record.args());
+    }
+}
+
 #[macro_export]
 macro_rules! println {
     () => ($crate::print!("\n"));

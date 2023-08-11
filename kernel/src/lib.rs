@@ -1,4 +1,9 @@
 #![no_std]
+#![feature(
+    int_roundings,
+    new_uninit,
+    strict_provenance
+)]
 
 extern crate alloc;
 
@@ -6,6 +11,8 @@ pub mod allocator;
 pub mod arch;
 pub mod mem;
 pub mod uart;
+pub mod dma; 
+pub mod dev;
 
 static HHDM: limine::HhdmRequest = limine::HhdmRequest::new();
 pub static MODE: limine::PagingModeRequest = limine::PagingModeRequest::new(

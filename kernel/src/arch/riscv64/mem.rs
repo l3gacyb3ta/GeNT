@@ -19,11 +19,11 @@ impl VirtualAddress {
 
     pub fn vpn(&self, idx: usize) -> usize {
         let vpn = match idx {
-            0 => self.vpn0(),
-            1 => self.vpn1(),
-            2 => self.vpn2(),
-            3 => self.vpn3(),
-            4 => self.vpn4(),
+            1 => self.vpn0(),
+            2 => self.vpn1(),
+            3 => self.vpn2(),
+            4 => self.vpn3(),
+            5 => self.vpn4(),
             _ => panic!("Indexed too far {}", idx)
         };
 

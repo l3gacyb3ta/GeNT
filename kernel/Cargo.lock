@@ -88,12 +88,19 @@ dependencies = [
  "aml",
  "bitfield",
  "bitflags 2.3.3",
+ "libsa",
  "limine",
  "linked_list_allocator",
+ "log",
  "rsdp",
  "spin",
  "vmem",
 ]
+
+[[package]]
+name = "libsa"
+version = "0.1.0"
+source = "git+https://github.com/bolt-os/libsa#b5f0a9af7e6cd1426418b7e5f9678f97b3e00fd3"
 
 [[package]]
 name = "limine"
@@ -176,7 +183,7 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 [[package]]
 name = "vmem"
 version = "0.1.0"
-source = "git+https://github.com/archaic-archea/vmem.git#39d5dbcbdb05a83c99e8dc593c8c373c1c5393c3"
+source = "git+https://github.com/archaic-archea/vmem.git#906b50b02d818fd64fb2b5692d9165d0c13559fa"
 dependencies = [
  "bitflags 1.3.2",
  "log",

@@ -2,7 +2,9 @@
 #![no_std]
 #![feature(
     naked_functions,
-    int_roundings
+    int_roundings,
+    strict_provenance,
+    pointer_byte_offsets
 )]
 
 extern crate alloc;
@@ -15,6 +17,8 @@ static MMAP: limine::MemoryMapRequest = limine::MemoryMapRequest::new();
 
 #[link_section = ".initext"]
 extern "C" fn kinit() -> ! {
+    log::set_logger(&gent_kern::uart::Logger).unwrap();
+    log::set_max_level(log::LevelFilter::Info);
     println!("Starting kernel");
     println!("Mode: {:?}", gent_kern::MODE.response().unwrap().mode());
     unsafe {
@@ -33,16 +37,10 @@ extern "C" fn kinit() -> ! {
     let xsdt = unsafe {
         acpi::AcpiTables::from_rsdp(
             Handler, 
-            RSDP.response().unwrap().rsdp_addr as usize
+            RSDP.response().unwrap().rsdp_addr as usize - gent_kern::mem::HHDM_OFFSET.load(core::sync::atomic::Ordering::Relaxed)
         )
     }.unwrap();
     println!("XSDT found");
-
-    let fadt = unsafe {
-        xsdt.get_sdt::<acpi::fadt::Fadt>(acpi::sdt::Signature::FADT).unwrap().unwrap()
-    };
-
-    let dsdt = fadt.dsdt_address().unwrap();
 
     let aml_handler: Box<dyn aml::Handler> = Box::new(gent_kern::arch::transit::Transit);
 
@@ -53,13 +51,79 @@ extern "C" fn kinit() -> ! {
     println!("Made AML context");
 
     unsafe {
-        let _dsdt = context.parse_table(
+        let dsdt = xsdt.dsdt.unwrap();
+        context.parse_table(
             &*core::ptr::slice_from_raw_parts(
-                dsdt as *const u8, 
-                20
+                dsdt.address as *const u8, 
+                dsdt.length as usize
             )
         ).unwrap();
+
+        for ssdt in xsdt.ssdts.iter() {
+            context.parse_table(
+                &*core::ptr::slice_from_raw_parts(
+                    ssdt.address as *const u8, 
+                    ssdt.length as usize
+                )
+            ).unwrap();
+        }
+
+        context.initialize_objects().unwrap();
     }
+
+    println!("{:#?}", context.namespace);
+
+    let resources = aml::resource::resource_descriptor_list(
+        context.namespace.get_by_path(
+            &aml::AmlName::from_str("\\_SB_.FWCF._CRS").unwrap()
+        ).unwrap()
+    ).unwrap();
+
+    let fw_cfg = &resources[0];
+
+    match fw_cfg {
+        aml::resource::Resource::MemoryRange(range) => {
+            match range {
+                aml::resource::MemoryRangeDescriptor::FixedLocation { 
+                    is_writable: _, 
+                    base_address, 
+                    range_length : _
+                } => {
+                    let base_address = (*base_address as usize) + gent_kern::mem::HHDM_OFFSET.load(core::sync::atomic::Ordering::Relaxed);
+
+                    println!("Found fwcfg at 0x{:x}", base_address);
+                    let fw_cfg = gent_kern::dev::fw_cfg::FwCfg::new(base_address);
+
+                    let files = fw_cfg.files();
+
+                    for file in files.iter() {
+                        println!("File {:#?}", file.name().unwrap());
+                    }
+
+                    let ramfb = fw_cfg.lookup("etc/ramfb").unwrap();
+
+                    println!("RAMFB sel: 0x{:x}", ramfb.sel().get());
+
+                    let ramfbcfg = gent_kern::dev::ramfb::RAMFBConfig::new(640, 480);
+                    let cfg_arr: [u8; 28] = unsafe {core::mem::transmute(ramfbcfg)};
+
+                    fw_cfg.write_file(ramfb, &cfg_arr).unwrap();
+
+                    let ramfbcfg: gent_kern::dev::ramfb::RAMFBConfig = unsafe {core::mem::transmute(cfg_arr)};
+
+                    for i in 0..ramfbcfg.byte_size() {
+                        unsafe {
+                            let ptr = ramfbcfg.addr() as *mut u8;
+
+                            ptr.add(i).write_volatile(0xff);
+                        }
+                    }
+                }
+            }
+        },
+        _ => unreachable!()
+    }
+
 
     println!("Kernel end");
     loop {}
@@ -71,21 +135,24 @@ struct Handler;
 impl acpi::AcpiHandler for Handler {
     unsafe fn map_physical_region<T>(&self, physical_address: usize, size: usize) -> acpi::PhysicalMapping<Self, T> {
         use gent_kern::arch::paging;
-        let physical_address = physical_address - gent_kern::mem::HHDM_OFFSET.load(core::sync::atomic::Ordering::Relaxed);
-
-        println!("Mapping physical address 0x{:x}", physical_address);
+        
+        // Mask out the bottom bits, they shouldnt be needed in the address
+        let physical_address = physical_address & 0xFFFFFFFFFFFFF000;
+        // Add the bottom bits from the physical address for edge cases
+        // E.g.: size 0x1000, which would require 2 pages normally with address 0x1001, but if we remove the bottom bits, its only 1 page
+        let size = size + (physical_address & 0xFFF);
 
         let mut root = paging::get_root_table();
 
-        let vaddr = gent_kern::mem::VIRT.alloc(size, vmem::AllocStrategy::NextFit).unwrap();
+        let mapped_len = size.div_ceil(0x1000) * 0x1000;
 
-        let mut mapped_len = 0;
+        let vaddr = gent_kern::mem::VIRT.alloc(mapped_len, vmem::AllocStrategy::NextFit).unwrap();
 
         for addr_offset in (0..size).step_by(4096) {
             let vaddr = gent_kern::mem::VirtualAddress::new(vaddr + addr_offset);
             let paddr = gent_kern::mem::PhysicalAddress::new(physical_address + addr_offset);
 
-            let size = size.div_ceil(0x1000) * 0x1000;
+            let size = 0x1000;
 
             root.map(
                 vaddr, 
@@ -96,10 +163,10 @@ impl acpi::AcpiHandler for Handler {
                     execute: false,
                     user: false,
                     global: false,
+                    dealloc: false
                 }, 
                 paging::PageSize::from_size(size)
             ).unwrap_or_else(|err| {
-
                 match err {
                     paging::PageError::InvalidSize => {
                         panic!("Failed to map due to invalid size");
@@ -112,11 +179,12 @@ impl acpi::AcpiHandler for Handler {
                             paddr.addr(),
                             entry.phys().addr()
                         );
+                    },
+                    _ => {
+                        panic!("{:#?}", err)
                     }
                 }
             });
-
-            mapped_len += 0x1000;
         }
 
         acpi::PhysicalMapping::new(
@@ -128,8 +196,38 @@ impl acpi::AcpiHandler for Handler {
         )
     }
 
-    fn unmap_physical_region<T>(_region: &acpi::PhysicalMapping<Self, T>) {
-        panic!("NO UNMAPPING ACPI STUFF YET!!!!!!!!")
+    fn unmap_physical_region<T>(region: &acpi::PhysicalMapping<Self, T>) {
+        unsafe {
+            use gent_kern::arch::paging;
+            let virtual_address = region.virtual_start().addr().get();
+
+            let mut root = paging::get_root_table();
+
+            for addr_offset in (0..region.mapped_length()).step_by(4096) {
+                let vaddr = gent_kern::mem::VirtualAddress::new(virtual_address + addr_offset);
+
+                let size = 0x1000;
+
+                root.unmap(
+                    vaddr, 
+                    paging::PageSize::from_size(size)
+                ).unwrap_or_else(|err| {
+                    match err {
+                        paging::PageError::NoMapping => {
+                            panic!("No mapping found");
+                        },
+                        paging::PageError::UnmappingSizeMismatch => {
+                            panic!("Sizes did not match");
+                        }
+                        _ => {
+                            panic!("{:#?}", err)
+                        }
+                    }
+                });
+            }
+
+            gent_kern::mem::VIRT.free(region.virtual_start().addr().get(), region.mapped_length());
+        }
     }
 }
 
