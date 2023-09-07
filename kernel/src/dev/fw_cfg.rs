@@ -9,14 +9,14 @@ const DMA_OFFSET: usize = 16;
 const SEL_OFFSET: usize = 8;
 
 pub struct FwCfg {
-    transit: crate::arch::transit::IOTransit,
+    transit: crate::arch::global::IOTransit,
     files: OnceCell<Vec<FwCfgFile>>,
 }
 
 impl FwCfg {
-    pub fn new(location: usize) -> Self {
+    pub unsafe fn new(location: crate::arch::global::IOType) -> Self {
         Self { 
-            transit: crate::arch::transit::IOTransit::new(location),
+            transit: crate::arch::global::IOTransit::new(location),
             files: OnceCell::new()
         }
     }

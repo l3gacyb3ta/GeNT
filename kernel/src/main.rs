@@ -91,8 +91,8 @@ extern "C" fn kinit() -> ! {
                 } => {
                     let base_address = (*base_address as usize) + gent_kern::mem::HHDM_OFFSET.load(core::sync::atomic::Ordering::Relaxed);
 
-                    println!("Found fwcfg at 0x{:x}", base_address);
-                    let fw_cfg = gent_kern::dev::fw_cfg::FwCfg::new(base_address);
+                    // TODO: Figure out how to see if something is Port IO, or Memory IO
+                    let fw_cfg = unsafe {gent_kern::dev::fw_cfg::FwCfg::new(gent_kern::arch::global::IOType::Mem(base_address))};
 
                     let files = fw_cfg.files();
 
