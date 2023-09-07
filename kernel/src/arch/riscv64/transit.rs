@@ -1,50 +1,8 @@
-use core::mem::MaybeUninit;
-
-pub struct IOTransit {
-    location: usize
-}
-
-impl IOTransit {
-    pub fn new(location: usize) -> Self {
-        Self { location }
-    }
-
-    pub fn write<T: Sized>(&self, offset: usize, val: T) {
-        let ptr = self.location + offset;
-        let ptr = ptr as *mut T;
-
-        unsafe {
-            ptr.write_volatile(val);
-        }
-    }
-
-    pub fn read<T: Copy>(&self, offset: usize) -> T {
-        let ptr = self.location + offset;
-        let ptr = ptr as *mut T;
-
-        unsafe {
-            ptr.read_volatile()
-        }
-    }
-
-    pub fn loc(&self) -> usize {
-        self.location
-    }
-
-    unsafe fn read_bytes_raw<S: Copy>(&self, dst: *mut S, size: usize, offset: usize) {
-        let mut written = 0;
-        while written < size {
-            dst.add(written).write(self.read::<S>(offset));
-            written += 1;
-        }
-    }
-
-    pub unsafe fn read_serial<T, S: Copy>(&self, offset: usize) -> T {
-        let mut uninit = MaybeUninit::<T>::uninit();
-        self.read_bytes_raw(uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>(), offset);
-        uninit.assume_init()
-    }
-}
+crate::no_io_ports!(u8);
+crate::no_io_ports!(u16);
+crate::no_io_ports!(u32);
+crate::no_io_ports!(u64);
+crate::no_io_ports!(u128);
 
 pub struct Transit;
 
