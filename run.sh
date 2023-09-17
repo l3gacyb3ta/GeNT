@@ -45,4 +45,4 @@ qemu-system-riscv64 \
     -device ramfb \
     -serial mon:stdio \
     -d int \
-#    D debug.log
+    -D debug.log
