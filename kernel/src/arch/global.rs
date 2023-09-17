@@ -68,7 +68,7 @@ impl IOTransit {
         }
     }
 
-    unsafe fn port_read_raw_bytes<S: Copy + PortAccess>(&self, offset: usize, dst: *mut S, size: usize) {
+    unsafe fn port_read_raw<S: Copy + PortAccess>(&self, offset: usize, dst: *mut S, size: usize) {
         let mut written = 0;
         while written < size {
             dst.add(written).write(PortAccess::read(self.iotype().loc() + offset));
@@ -76,7 +76,7 @@ impl IOTransit {
         }
     }
 
-    unsafe fn mem_read_raw_bytes<S: Copy>(&self, offset: usize, dst: *mut S, size: usize) {
+    unsafe fn mem_read_raw<S: Copy>(&self, offset: usize, dst: *mut S, size: usize) {
         let mut written = 0;
         while written < size {
             dst.add(written).write(self.memread::<S>(offset));
@@ -89,8 +89,8 @@ impl IOTransit {
         println!("Reading {:x?} offset by {:x} in serial mode for {} bytes", self.location, offset, core::mem::size_of::<T>());
         unsafe {
             match self.iotype() {
-                IOType::Mem(_) => self.mem_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>()),
-                IOType::Port(_) => self.port_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>())
+                IOType::Mem(_) => self.mem_read_raw(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>()),
+                IOType::Port(_) => self.port_read_raw(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>())
             }
             uninit.assume_init()
         }
