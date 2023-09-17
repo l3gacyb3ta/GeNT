@@ -14,7 +14,12 @@ fi
 if ! test -f "EDK2.fd"; then
     curl https://retrage.github.io/edk2-nightly/bin/RELEASERISCV64_VIRT.fd -o EDK2.fd
 fi
-truncate EDK2.fd --size 33554432
+
+if [ $(uname) == "Darwin" ]; then
+    truncate -s 33554432 EDK2.fd 
+else 
+    truncate EDK2.fd --size 33554432
+fi
 
 if test -f "limine"; then
     echo Grabbing Limine
