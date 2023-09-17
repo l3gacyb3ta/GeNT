@@ -3,10 +3,11 @@ use core::cell::OnceCell;
 use alloc::vec::Vec;
 use libsa::{volatile::Volatile, endian::{BigEndianU16, BigEndianU32, BigEndianU64}};
 
-use crate::dma::DmaRange;
+use crate::{dma::DmaRange, println};
 
 const DMA_OFFSET: usize = 16;
 const SEL_OFFSET: usize = 8;
+const DATA_OFFSET: usize = 0;
 
 pub struct FwCfg {
     transit: crate::arch::global::IOTransit,
@@ -23,14 +24,18 @@ impl FwCfg {
 
     /// Returns a list of all available files
     pub fn files(&self) -> &[FwCfgFile] {
+        println!("Grabbing files");
         self.files.get_or_init(|| {
             self.transit.write(SEL_OFFSET, 0x19_u16.to_be());
-            (0..u32::from_be(self.transit.read::<u32>(0)))
-                .map(|_| unsafe {
-                        self.transit.read_serial::<_, u8>(0)
+            let filecount = self.transit.read::<BigEndianU32>(DATA_OFFSET).get();
+            
+            println!("Reading {} files", filecount);
+            (0..filecount)
+                .map(|_| {
+                        self.transit.read_serial::<FwCfgFile, u8>(DATA_OFFSET)
                     }
                 )
-                .collect()
+            .collect()
         })
     }
 
@@ -158,7 +163,7 @@ bitflags::bitflags! {
 pub struct FwCfgFile {
     size: BigEndianU32,
     select: BigEndianU16,
-    _res: BigEndianU16,
+    _res: u16,
     name: [u8; 56]
 }
 
