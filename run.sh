@@ -22,7 +22,7 @@ if test -f "limine"; then
 fi 
 make -C limine
 mkdir -p .root
-cp -v kernel/target/riscv64gc-unknown-none-elf/release/gent-kern config/limine.cfg limine/limine-bios.sys \
+cp -v kernel/target/riscv64imac-unknown-none-elf/release/gent-kern config/limine.cfg limine/limine-bios.sys \
       limine/limine-bios-cd.bin limine/limine-uefi-cd.bin \
       .root/
 mkdir -p .root/EFI/BOOT
@@ -39,5 +39,5 @@ qemu-system-riscv64 \
     -global virtio-mmio.force-legacy=false \
     -device ramfb \
     -serial mon:stdio \
-    -d int,trace:fw_cfg_select,trace:fw_cfg_read \
-    -D debug.log
+    -d guest_errors,trace:fw_cfg_select,trace:fw_cfg_read,trace:fw_cfg_add_bytes,trace:fw_cfg_add_file,trace:fw_cfg_add_string,trace:fw_cfg_add_i16,trace:fw_cfg_add_i32,trace:fw_cfg_add_i64
+#    -D debug.log
