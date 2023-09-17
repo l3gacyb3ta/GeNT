@@ -1,4 +1,5 @@
 #![no_std]
+#![deny(warnings)]
 #![feature(
     int_roundings,
     new_uninit,

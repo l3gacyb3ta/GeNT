@@ -53,7 +53,7 @@ impl<T: Sized> DmaRange<[T]> {
 
         let slice: &[T] = unsafe {core::slice::from_raw_parts(ptr, amount)};
 
-        return slice;
+        slice
     }
 
     pub fn buf_mut(&mut self) -> &mut [T] {
@@ -62,12 +62,25 @@ impl<T: Sized> DmaRange<[T]> {
 
         let slice: &mut [T] = unsafe {core::slice::from_raw_parts_mut(ptr, amount)};
 
-        return slice;
+        slice
     }
 }
 
 impl<T> DmaRange<T> {
-    pub fn new() -> Self {
+
+    /// Takes the self and returns a reference, and physical address
+    pub fn leak(self) -> (&'static mut [T], usize) {
+        let ptr = self.virt as *mut T;
+        let amount = self.length / core::mem::size_of::<T>();
+
+        let slice: &'static mut [T] = unsafe {core::slice::from_raw_parts_mut(ptr, amount)};
+
+        (slice, self.phys)
+    }
+}
+
+impl<T> Default for DmaRange<T> {
+    fn default() -> Self {
         let mut root = crate::arch::paging::get_root_table();
 
         let size = core::mem::size_of::<T>();
@@ -103,16 +116,6 @@ impl<T> DmaRange<T> {
             phys,
             data: PhantomData 
         }
-    }
-
-    /// Takes the self and returns a reference, and physical address
-    pub fn leak(self) -> (&'static mut [T], usize) {
-        let ptr = self.virt as *mut T;
-        let amount = self.length / core::mem::size_of::<T>();
-
-        let slice: &'static mut [T] = unsafe {core::slice::from_raw_parts_mut(ptr, amount)};
-
-        return (slice, self.phys);
     }
 }
 

@@ -2,8 +2,6 @@ use core::mem::MaybeUninit;
 
 use libsa::endian::BigEndianU32;
 
-use crate::println;
-
 #[derive(Clone, Copy, Debug)]
 pub enum IOType {
     Port(usize),
@@ -24,6 +22,9 @@ pub struct IOTransit {
 }
 
 impl IOTransit {
+    /// # Safety
+    /// The provided address must be valid in memory or port space.
+    /// No guarantees are made about how accessing this address will effect things due to IO
     pub unsafe fn new(location: IOType) -> Self {
         Self { location }
     }
@@ -53,7 +54,7 @@ impl IOTransit {
         unsafe {
             let ptr = (self.iotype().loc() + offset) as *const T;
 
-            return ptr.read_volatile();
+            ptr.read_volatile()
         }
     }
 
@@ -61,6 +62,8 @@ impl IOTransit {
         self.location
     }
 
+    /// # Safety
+    /// The location here must follow the same rules as the address provided to `Self::new`
     pub unsafe fn set_loc(&mut self, loc: usize) {
         match self.location {
             IOType::Mem(_) => self.location = IOType::Mem(loc),
@@ -88,7 +91,6 @@ impl IOTransit {
 
     pub fn read_serial<T: Sized, S: Copy + PortAccess>(&self, offset: usize) -> T {
         let mut uninit = MaybeUninit::<T>::uninit();
-        println!("Reading {:x?} offset by {:x} in serial mode for {} bytes", self.location, offset, core::mem::size_of::<T>());
         unsafe {
             match self.iotype() {
                 IOType::Mem(_) => self.mem_read_raw(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>()),
@@ -100,7 +102,12 @@ impl IOTransit {
 }
 
 pub trait PortAccess {
+    /// # Safety
+    /// The address must be a valid address in port space.
     unsafe fn write(location: usize, val: Self);
+    
+    /// # Safety
+    /// The address must be a valid address in port space.
     unsafe fn read(location: usize) -> Self;
 }
 

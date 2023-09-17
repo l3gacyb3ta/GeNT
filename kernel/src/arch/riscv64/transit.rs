@@ -14,56 +14,56 @@ impl aml::Handler for Transit {
     fn read_u64(&self, address: usize) -> u64 {
         let ptr = address as *const u64;
         unsafe {
-            return *ptr;
+            ptr.read_volatile()
         }
     }
 
     fn read_u32(&self, address: usize) -> u32 {
         let ptr = address as *const u32;
         unsafe {
-            return *ptr;
+            ptr.read_volatile()
         }
     }
 
     fn read_u16(&self, address: usize) -> u16 {
         let ptr = address as *const u16;
         unsafe {
-            return *ptr;
+            ptr.read_volatile()
         }
     }
 
     fn read_u8(&self, address: usize) -> u8 {
         let ptr = address as *const u8;
         unsafe {
-            return *ptr;
+            ptr.read_volatile()
         }
     }
 
     fn write_u64(&mut self, address: usize, value: u64) {
         let ptr = address as *mut u64;
         unsafe {
-            *ptr = value;
+            ptr.write_volatile(value);
         }
     }
 
     fn write_u32(&mut self, address: usize, value: u32) {
         let ptr = address as *mut u32;
         unsafe {
-            *ptr = value;
+            ptr.write_volatile(value);
         }
     }
 
     fn write_u16(&mut self, address: usize, value: u16) {
         let ptr = address as *mut u16;
         unsafe {
-            *ptr = value;
+            ptr.write_volatile(value);
         }
     }
 
     fn write_u8(&mut self, address: usize, value: u8) {
         let ptr = address as *mut u8;
         unsafe {
-            *ptr = value;
+            ptr.write_volatile(value);
         }
     }
 

@@ -1,5 +1,6 @@
 #![no_main]
 #![no_std]
+#![deny(warnings)]
 #![feature(
     naked_functions,
     int_roundings,
@@ -124,9 +125,7 @@ extern "C" fn kinit() -> ! {
         _ => unreachable!()
     }
 
-
-    println!("Kernel end");
-    loop {}
+    panic!("Kernel end");
 }
 
 #[derive(Clone, Copy)]

@@ -9,7 +9,7 @@ pub fn get_root_table() -> RootTable {
 
     let satp: super::csr::Satp = unsafe {core::mem::transmute(satp_raw)};
 
-    return RootTable(satp.phys().to_virt().to_mut_ptr(), satp.mode());
+    RootTable(satp.phys().to_virt().to_mut_ptr(), satp.mode())
 }
 
 pub enum Mode {
@@ -58,6 +58,7 @@ impl Mode {
     }
 }
 
+#[repr(u64)]
 #[derive(PartialEq, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum PageSize {
     Petapage = 0x1000_0000_0000,
@@ -140,6 +141,8 @@ pub enum PageError {
 pub struct RootTable(*mut PageTable, Mode);
 
 impl RootTable {
+    /// # Safety
+    /// Can change what memory addresses are valid to access, and how its valid to access it.
     pub unsafe fn map(
         &mut self, 
         vaddr: crate::mem::VirtualAddress, 
@@ -158,7 +161,7 @@ impl RootTable {
         }
 
         while cur_level >= size.to_level() {
-            let entry = &mut (*table)[vaddr.vpn(cur_level) as usize];
+            let entry = &mut (*table)[vaddr.vpn(cur_level)];
 
             match entry.entry() {
                 Entry::Table(next_table) => {
@@ -196,6 +199,8 @@ impl RootTable {
         unreachable!()
     }
 
+    /// # Safety
+    /// Can change what memory addresses are valid to access, and how its valid to access it.
     pub unsafe fn unmap(
         &mut self, 
         vaddr: crate::mem::VirtualAddress, 
@@ -212,7 +217,7 @@ impl RootTable {
         }
 
         while cur_level >= size.to_level() {
-            let entry = &mut (*table)[vaddr.vpn(cur_level) as usize];
+            let entry = &mut (*table)[vaddr.vpn(cur_level)];
 
             match entry.entry() {
                 Entry::Table(next_table) => {
@@ -255,7 +260,7 @@ impl RootTable {
         loop {
             unsafe {
                 // We get the current entry by dereferencing the table, and indexing it based on the virtual address' vpn for the current level
-                let entry = (*table)[vaddr.vpn(cur_level) as usize];
+                let entry = (*table)[vaddr.vpn(cur_level)];
                 
                 // `entry.entry()` returns an `entry` type, which is an enum identifying an entry as a table, page, or invalid entry
                 match entry.entry() {
@@ -353,12 +358,12 @@ impl PageTableEntry {
             let addr = phys.addr() + crate::mem::HHDM_OFFSET.load(core::sync::atomic::Ordering::Relaxed);
 
             if self.read() | self.write() | self.exec() {
-                return Entry::Page(addr as *const u8);
+                Entry::Page(addr as *const u8)
             } else {
-                return Entry::Table(addr as *const PageTable);
+                Entry::Table(addr as *const PageTable)
             }
         } else {
-            return Entry::Invalid;
+            Entry::Invalid
         }
     }
 }
