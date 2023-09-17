@@ -45,7 +45,7 @@ impl IOTransit {
     fn memwrite<T: Sized>(&self, offset: usize, val: T) {
         unsafe {
             let ptr = (self.iotype().loc() + offset) as *mut T;
-            *ptr = val;
+            ptr.write_volatile(val);
         }
     }
 
@@ -53,7 +53,7 @@ impl IOTransit {
         unsafe {
             let ptr = (self.iotype().loc() + offset) as *const T;
 
-            return *ptr;
+            return ptr.read_volatile();
         }
     }
 
