@@ -44,5 +44,5 @@ qemu-system-riscv64 \
     -global virtio-mmio.force-legacy=false \
     -device ramfb \
     -serial mon:stdio \
-    -d guest_errors,trace:fw_cfg_select,trace:fw_cfg_read,trace:fw_cfg_add_bytes,trace:fw_cfg_add_file,trace:fw_cfg_add_string,trace:fw_cfg_add_i16,trace:fw_cfg_add_i32,trace:fw_cfg_add_i64
-#    -D debug.log
+    -d int \
+#    D debug.log
