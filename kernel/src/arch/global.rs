@@ -1,6 +1,10 @@
 use core::mem::MaybeUninit;
 
-#[derive(Clone, Copy)]
+use libsa::endian::BigEndianU32;
+
+use crate::println;
+
+#[derive(Clone, Copy, Debug)]
 pub enum IOType {
     Port(usize),
     Mem(usize)
@@ -82,10 +86,11 @@ impl IOTransit {
 
     pub fn read_serial<T: Sized, S: Copy + PortAccess>(&self, offset: usize) -> T {
         let mut uninit = MaybeUninit::<T>::uninit();
+        println!("Reading {:x?} offset by {:x} in serial mode for {} bytes", self.location, offset, core::mem::size_of::<T>());
         unsafe {
             match self.iotype() {
-                IOType::Mem(_) => self.mem_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<S>()),
-                IOType::Port(_) => self.port_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<S>())
+                IOType::Mem(_) => self.mem_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>()),
+                IOType::Port(_) => self.port_read_raw_bytes(offset, uninit.as_mut_ptr().cast::<S>(), core::mem::size_of::<T>() / core::mem::size_of::<S>())
             }
             uninit.assume_init()
         }
@@ -95,4 +100,16 @@ impl IOTransit {
 pub trait PortAccess {
     unsafe fn write(location: usize, val: Self);
     unsafe fn read(location: usize) -> Self;
+}
+
+impl PortAccess for BigEndianU32 {
+    unsafe fn read(location: usize) -> Self {
+        let base: u32 = PortAccess::read(location);
+
+        BigEndianU32::new(base)
+    }
+
+    unsafe fn write(location: usize, val: Self) {
+        PortAccess::write(location, val.get())
+    }
 }
