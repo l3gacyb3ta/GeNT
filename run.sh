@@ -11,17 +11,13 @@ else
     exit
 fi
 
-if ! test -f "EDK2.fd"; then
-    curl https://retrage.github.io/edk2-nightly/bin/RELEASERISCV64_VIRT.fd -o EDK2.fd
-fi
-
 if [ $(uname) == "Darwin" ]; then
     truncate -s 33554432 EDK2.fd 
 else 
-    truncate EDK2.fd --size 33554432
+    truncate CODE.fd --size 33554432
 fi
 
-if test -f "limine"; then
+if test -d "limine"; then
     echo Grabbing Limine
     git clone https://github.com/limine-bootloader/limine.git --depth 1 --branch=v5.x-branch-binary 
 fi 
@@ -38,7 +34,7 @@ qemu-system-riscv64 \
     -cpu rv64,svpbmt=on \
     -smp 1 \
     -m 4G \
-    -drive if=pflash,format=raw,unit=1,file=EDK2.fd \
+    -pflash CODE.fd \
     -device nvme,serial=deadbeff,drive=disk1 \
     -drive id=disk1,format=raw,if=none,file=fat:rw:./.root \
     -global virtio-mmio.force-legacy=false \

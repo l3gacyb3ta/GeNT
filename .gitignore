@@ -1,5 +1,4 @@
 /kernel/target
-/*.fd
 /limine
 /.root
 /*.log
