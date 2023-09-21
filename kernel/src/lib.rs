@@ -13,6 +13,7 @@ pub mod arch;
 pub mod mem;
 pub mod uart;
 pub mod dma; 
+pub mod power;
 pub mod dev;
 
 static HHDM: limine::HhdmRequest = limine::HhdmRequest::new();

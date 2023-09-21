@@ -17,7 +17,7 @@ else
     truncate CODE.fd --size 33554432
 fi
 
-if test -d "limine"; then
+if ! test -d "limine"; then
     echo Grabbing Limine
     git clone https://github.com/limine-bootloader/limine.git --depth 1 --branch=v5.x-branch-binary 
 fi 

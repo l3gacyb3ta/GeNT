@@ -92,6 +92,7 @@ dependencies = [
  "limine",
  "linked_list_allocator",
  "log",
+ "psf2",
  "rsdp",
  "spin",
  "vmem",
@@ -134,6 +135,11 @@ name = "log"
 version = "0.4.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b06a4cde4c0f271a446782e3eff8de789548ce57dbc8eca9292c27f4a42004b4"
+
+[[package]]
+name = "psf2"
+version = "0.5.0"
+source = "git+https://github.com/l3gacyb3ta/psf2#304b5595d05f54fc0796f3601306e65aab057d3f"
 
 [[package]]
 name = "radium"

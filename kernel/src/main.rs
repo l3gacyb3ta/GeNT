@@ -112,13 +112,21 @@ extern "C" fn kinit() -> ! {
 
                     let ramfbcfg: gent_kern::dev::ramfb::RAMFBConfig = unsafe {core::mem::transmute(cfg_arr)};
 
-                    for i in 0..ramfbcfg.byte_size() {
-                        unsafe {
-                            let ptr = ramfbcfg.addr() as *mut u8;
+                    // for i in 0..ramfbcfg.byte_size() {
+                    //     unsafe {
+                    //         let ptr = ramfbcfg.addr() as *mut u8;
 
-                            ptr.add(i).write_volatile(0xff);
-                        }
-                    }
+                    //         ptr.add(i).write_volatile(0xff);
+                    //     }
+                    // }
+
+                    // let window = gent_kern::dev::ramfb::Window::new(10, 0, 30, 30, ramfbcfg);
+                    // window.fill(gent_kern::dev::ramfb::Color::new(0x00, 0x00, 0xff));
+                    // window.render();
+
+                    gent_kern::dev::ramfb::fillrect(&ramfbcfg, gent_kern::dev::ramfb::Color::new_from_hex(0x00ff00), 80, 80);
+                    gent_kern::dev::ramfb::render_char(&ramfbcfg, '&', 0xffffff.into());
+
                 }
             }
         },

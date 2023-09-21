@@ -15,6 +15,7 @@ bitfield = "0.14.0"
 bitflags = "2.2.1"
 libsa = { git = "https://github.com/bolt-os/libsa" }
 log = "0.4.14"
+psf2 = {git = "https://github.com/l3gacyb3ta/psf2"}
 
 [dependencies.limine]
 git = "https://github.com/bolt-os/limine-rs"
